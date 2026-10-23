@@ -25,4 +25,5 @@ Minimal ecommerce application built on Next.js with functional Stripe sandbox ch
   * [x] Checkout page and Stripe session creation API route, covers AC-3, AC-5, AC-6
   * [x] Payment verification API route, order receipt page, and order history, covers AC-7, AC-8
 * [x] Verify it: /check verify stripe sandbox ecommerce store
+* [x] Review it (fresh model): /check review stripe sandbox ecommerce store (reviewed by Gemini Pro in docs/reviews/2026-10-23-main.md)
 * [ ] Test it: /test stripe sandbox ecommerce store
