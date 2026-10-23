@@ -14,9 +14,12 @@ export async function GET(req: NextRequest) {
     }
 
     const customSecretKey = req.headers.get("x-stripe-secret-key");
-    const secretKey =
+    const rawSecret =
       (customSecretKey && customSecretKey.trim()) ||
-      process.env.STRIPE_SECRET_KEY;
+      process.env.SECRET_KEY ||
+      process.env.STRIPE_SECRET_KEY ||
+      "";
+    const secretKey = rawSecret.replace(/^["']|["']$/g, "").trim();
 
     if (!secretKey) {
       return NextResponse.json(

@@ -12,6 +12,7 @@ interface StripeConfigContextType {
   clearConfig: () => void;
   hasValidKeys: boolean;
   serverFallbackAvailable: boolean;
+  serverPublishableKey: string | null;
 }
 
 const DEFAULT_CONFIG: StripeConfig = {
@@ -28,6 +29,7 @@ export function StripeConfigProvider({ children }: { children: React.ReactNode }
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [serverFallbackAvailable, setServerFallbackAvailable] = useState(false);
+  const [serverPublishableKey, setServerPublishableKey] = useState<string | null>(null);
 
   useEffect(() => {
     const loaded = getFromStorage<StripeConfig>(STORAGE_KEYS.STRIPE_CONFIG, DEFAULT_CONFIG);
@@ -40,6 +42,9 @@ export function StripeConfigProvider({ children }: { children: React.ReactNode }
       .then((data) => {
         if (data && data.serverConfigured) {
           setServerFallbackAvailable(true);
+          if (data.publishableKey) {
+            setServerPublishableKey(data.publishableKey);
+          }
         }
       })
       .catch(() => {
@@ -66,8 +71,8 @@ export function StripeConfigProvider({ children }: { children: React.ReactNode }
   };
 
   const hasValidKeys =
-    Boolean(config.isConfigured && config.secretKey.startsWith("sk_test_")) ||
-    serverFallbackAvailable;
+    serverFallbackAvailable ||
+    Boolean(config.isConfigured && config.secretKey.startsWith("sk_test_"));
 
   return (
     <StripeConfigContext.Provider
@@ -79,6 +84,7 @@ export function StripeConfigProvider({ children }: { children: React.ReactNode }
         clearConfig,
         hasValidKeys,
         serverFallbackAvailable,
+        serverPublishableKey,
       }}
     >
       {children}

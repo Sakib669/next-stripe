@@ -52,9 +52,8 @@ function CheckoutContent() {
     }
 
     if (!hasValidKeys) {
-      setIsDrawerOpen(true);
       setErrorMessage(
-        "Stripe credentials required. Please enter your sandbox test keys in the credentials drawer."
+        "Stripe credentials missing. Please set SECRET_KEY in your .env file."
       );
       return;
     }
@@ -191,7 +190,7 @@ function CheckoutContent() {
             <div>
               <p className="font-semibold text-sm">Stripe Sandbox Keys Missing</p>
               <p className="text-amber-800">
-                You must enter your test credentials before checking out with Stripe.
+                Please set SECRET_KEY in your .env file to enable Stripe checkout.
               </p>
             </div>
           </div>
@@ -200,7 +199,7 @@ function CheckoutContent() {
             onClick={() => setIsDrawerOpen(true)}
             className="w-full sm:w-auto rounded-xl bg-amber-900 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-950 transition"
           >
-            Configure Keys Now
+            View Configuration
           </button>
         </div>
       )}

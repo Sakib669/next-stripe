@@ -60,7 +60,7 @@ export function Header() {
                 ? "bg-emerald-50/80 text-emerald-800 border-emerald-200 hover:bg-emerald-100/80"
                 : "bg-amber-50/80 text-amber-800 border-amber-200 hover:bg-amber-100/80 animate-pulse"
             }`}
-            title="Click to configure Stripe sandbox credentials"
+            title="Click to view Stripe sandbox credentials"
           >
             {hasValidKeys ? (
               <>
@@ -71,7 +71,7 @@ export function Header() {
             ) : (
               <>
                 <Key className="h-3.5 w-3.5 text-amber-600" />
-                <span>Configure Keys</span>
+                <span>Configure .env Keys</span>
               </>
             )}
           </button>

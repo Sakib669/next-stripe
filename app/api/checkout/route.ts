@@ -10,15 +10,18 @@ interface CheckoutItemPayload {
 export async function POST(req: NextRequest) {
   try {
     const customSecretKey = req.headers.get("x-stripe-secret-key");
-    const secretKey =
+    const rawSecret =
       (customSecretKey && customSecretKey.trim()) ||
-      process.env.STRIPE_SECRET_KEY;
+      process.env.SECRET_KEY ||
+      process.env.STRIPE_SECRET_KEY ||
+      "";
+    const secretKey = rawSecret.replace(/^["']|["']$/g, "").trim();
 
     if (!secretKey) {
       return NextResponse.json(
         {
           error:
-            "Stripe Secret Key is missing. Please provide your test secret key (sk_test_...) via the on screen credentials drawer or set STRIPE_SECRET_KEY in your environment.",
+            "Stripe Secret Key is missing. Please set SECRET_KEY in your .env file.",
         },
         { status: 401 }
       );
