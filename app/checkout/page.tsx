@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -24,15 +24,23 @@ import {
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const isCanceled = searchParams.get("canceled") === "true";
+  const canceledOrderId = searchParams.get("order_id");
 
   const { items, subtotalInCents, taxInCents, totalInCents } = useCart();
   const { config, hasValidKeys, setIsDrawerOpen } = useStripeConfig();
-  const { saveOrder } = useOrders();
+  const { saveOrder, updateOrderStatus } = useOrders();
 
   const [customerEmail, setCustomerEmail] = useState("tester@example.com");
   const [customerName, setCustomerName] = useState("Demo Customer");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // If returning from a canceled checkout, update the draft order status to canceled
+  useEffect(() => {
+    if (isCanceled && canceledOrderId) {
+      updateOrderStatus(canceledOrderId, "canceled");
+    }
+  }, [isCanceled, canceledOrderId, updateOrderStatus]);
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -267,7 +275,7 @@ function CheckoutContent() {
                     Stripe Hosted Checkout
                   </h4>
                   <p className="text-xs text-zinc-500">
-                    Sandbox test mode with instant card validation
+                    Sandbox test mode with dynamic payment methods
                   </p>
                 </div>
               </div>
@@ -317,8 +325,8 @@ function CheckoutContent() {
                 <span className="font-mono">{formatPrice(subtotalInCents)}</span>
               </div>
               <div className="flex justify-between text-zinc-600">
-                <span>Estimated Tax (8%)</span>
-                <span className="font-mono">{formatPrice(taxInCents)}</span>
+                <span>Taxes & Fees</span>
+                <span className="text-emerald-700 font-medium">Included</span>
               </div>
               <div className="flex justify-between text-base font-bold text-zinc-950 pt-2 border-t border-zinc-200">
                 <span>Total Due</span>

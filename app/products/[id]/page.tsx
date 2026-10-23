@@ -23,7 +23,7 @@ export default function ProductDetailPage() {
   const id = typeof params?.id === "string" ? params.id : "";
   const product = getProductById(id);
 
-  const { addToCart } = useCart();
+  const { addToCart, setIsCartOpen } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -52,6 +52,7 @@ export default function ProductDetailPage() {
 
   const handleInstantBuy = () => {
     addToCart(product, quantity);
+    setIsCartOpen(false);
     router.push("/checkout");
   };
 

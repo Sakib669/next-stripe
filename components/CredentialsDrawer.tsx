@@ -46,9 +46,17 @@ export function CredentialsDrawer() {
   };
 
   const copyTestCard = () => {
-    navigator.clipboard.writeText("4242424242424242");
-    setCopiedCard(true);
-    setTimeout(() => setCopiedCard(false), 2000);
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText("4242424242424242")
+        .then(() => {
+          setCopiedCard(true);
+          setTimeout(() => setCopiedCard(false), 2000);
+        })
+        .catch((err) => {
+          console.warn("Failed to copy card to clipboard:", err);
+        });
+    }
   };
 
   const isPubValid = pubKey.startsWith("pk_test_");

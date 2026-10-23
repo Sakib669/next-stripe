@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
@@ -13,13 +13,9 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  ShoppingBag,
-  ArrowRight,
   ShieldCheck,
-  Receipt,
-  RotateCcw,
-  ExternalLink,
   Printer,
+  ArrowRight,
   Loader2,
 } from "lucide-react";
 
@@ -33,9 +29,11 @@ function OrderDetailsContent() {
   const { clearCart } = useCart();
   const { config } = useStripeConfig();
 
-  const [order, setOrder] = useState<Order | undefined>(undefined);
-  const [isVerifying, setIsVerifying] = useState(Boolean(sessionId));
+  const [order, setOrder] = useState<Order | undefined>(() => getOrderById(orderId));
+  const [isVerifying, setIsVerifying] = useState(Boolean(sessionId && order?.paymentStatus !== "paid"));
   const [verificationError, setVerificationError] = useState<string | null>(null);
+
+  const hasVerifiedRef = useRef(false);
 
   useEffect(() => {
     const existing = getOrderById(orderId);
@@ -45,10 +43,11 @@ function OrderDetailsContent() {
   }, [orderId, getOrderById]);
 
   useEffect(() => {
-    if (!sessionId) {
+    if (!sessionId || hasVerifiedRef.current || order?.paymentStatus === "paid") {
       return;
     }
 
+    hasVerifiedRef.current = true;
     let isMounted = true;
 
     async function verifyPayment() {
@@ -72,6 +71,13 @@ function OrderDetailsContent() {
         }
 
         if (isMounted) {
+          // Security check: verify that Stripe session metadata orderId matches URL orderId
+          if (data.orderId && data.orderId !== orderId) {
+            throw new Error(
+              `Security validation failed: The verified Stripe session belongs to order "${data.orderId}" rather than "${orderId}".`
+            );
+          }
+
           if (data.paid) {
             // Update order status in context and local storage
             updateOrderStatus(orderId, "paid", {
@@ -135,7 +141,7 @@ function OrderDetailsContent() {
     return () => {
       isMounted = false;
     };
-  }, [sessionId, orderId, config.secretKey, updateOrderStatus, clearCart, saveOrder]);
+  }, [sessionId, orderId, config.secretKey, order?.paymentStatus, updateOrderStatus, clearCart, saveOrder]);
 
   const handlePrint = () => {
     window.print();
@@ -185,7 +191,7 @@ function OrderDetailsContent() {
       {/* Verification error alert */}
       {verificationError && (
         <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-xs text-red-900 flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <h4 className="font-semibold text-sm text-red-950">Verification Warning</h4>
             <p className="mt-0.5">{verificationError}</p>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { CartItem, Product } from "../lib/types";
 import { getFromStorage, saveToStorage, STORAGE_KEYS } from "../lib/storage";
 
@@ -23,64 +23,86 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     const stored = getFromStorage<CartItem[]>(STORAGE_KEYS.CART, []);
     setItems(stored);
-    setIsHydrated(true);
   }, []);
 
-  const updateCart = (newItems: CartItem[]) => {
+  const updateCart = useCallback((newItems: CartItem[]) => {
     setItems(newItems);
     saveToStorage(STORAGE_KEYS.CART, newItems);
-  };
+  }, []);
 
-  const addToCart = (product: Product, quantity = 1) => {
-    const existingIndex = items.findIndex((item) => item.productId === product.id);
-    if (existingIndex > -1) {
-      const updated = [...items];
-      updated[existingIndex].quantity += quantity;
-      updateCart(updated);
-    } else {
-      const newItem: CartItem = {
-        productId: product.id,
-        product,
-        quantity,
-        addedAt: Date.now(),
-      };
-      updateCart([...items, newItem]);
-    }
+  const addToCart = useCallback((product: Product, quantity = 1) => {
+    setItems((prev) => {
+      const existingIndex = prev.findIndex((item) => item.productId === product.id);
+      let updated: CartItem[];
+      if (existingIndex > -1) {
+        updated = prev.map((item, idx) =>
+          idx === existingIndex
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        const newItem: CartItem = {
+          productId: product.id,
+          product,
+          quantity,
+          addedAt: Date.now(),
+        };
+        updated = [...prev, newItem];
+      }
+      saveToStorage(STORAGE_KEYS.CART, updated);
+      return updated;
+    });
     setIsCartOpen(true);
-  };
+  }, []);
 
-  const removeFromCart = (productId: string) => {
-    const updated = items.filter((item) => item.productId !== productId);
-    updateCart(updated);
-  };
+  const removeFromCart = useCallback((productId: string) => {
+    setItems((prev) => {
+      const updated = prev.filter((item) => item.productId !== productId);
+      saveToStorage(STORAGE_KEYS.CART, updated);
+      return updated;
+    });
+  }, []);
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
-    const updated = items.map((item) =>
-      item.productId === productId ? { ...item, quantity } : item
-    );
-    updateCart(updated);
-  };
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
+    setItems((prev) => {
+      if (quantity <= 0) {
+        const updated = prev.filter((item) => item.productId !== productId);
+        saveToStorage(STORAGE_KEYS.CART, updated);
+        return updated;
+      }
+      const updated = prev.map((item) =>
+        item.productId === productId ? { ...item, quantity } : item
+      );
+      saveToStorage(STORAGE_KEYS.CART, updated);
+      return updated;
+    });
+  }, []);
 
-  const clearCart = () => {
-    updateCart([]);
-  };
+  const clearCart = useCallback(() => {
+    setItems([]);
+    saveToStorage(STORAGE_KEYS.CART, []);
+  }, []);
 
-  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
-  const subtotalInCents = items.reduce(
-    (total, item) => total + item.product.priceInCents * item.quantity,
-    0
+  const itemCount = useMemo(
+    () => items.reduce((total, item) => total + item.quantity, 0),
+    [items]
   );
-  // Estimated 8% standard tax
-  const taxInCents = Math.round(subtotalInCents * 0.08);
+
+  const subtotalInCents = useMemo(
+    () =>
+      items.reduce(
+        (total, item) => total + item.product.priceInCents * item.quantity,
+        0
+      ),
+    [items]
+  );
+
+  // Transparent pricing: 0 additional tax for demo checkout (matches Stripe total exactly)
+  const taxInCents = 0;
   const totalInCents = subtotalInCents + taxInCents;
 
   return (

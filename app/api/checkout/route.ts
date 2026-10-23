@@ -100,16 +100,22 @@ export async function POST(req: NextRequest) {
       apiVersion: "2024-12-18.acacia" as Stripe.LatestApiVersion,
     });
 
-    const origin =
-      req.headers.get("origin") ||
-      req.headers.get("referer") ||
-      "http://localhost:3000";
+    // Safely derive origin without path corruption
+    const reqUrl = new URL(req.url);
+    const originHeader = req.headers.get("origin");
+    const refererHeader = req.headers.get("referer");
+    let cleanOrigin = originHeader;
+    if (!cleanOrigin && refererHeader) {
+      try {
+        cleanOrigin = new URL(refererHeader).origin;
+      } catch {
+        cleanOrigin = reqUrl.origin;
+      }
+    }
+    cleanOrigin = cleanOrigin || reqUrl.origin;
 
-    const cleanOrigin = origin.replace(/\/$/, "");
-
-    // Create Checkout Session
+    // Create Checkout Session with dynamic payment methods
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
       mode: "payment",
       line_items: lineItems,
       customer_email: customerEmail?.trim() || undefined,
@@ -118,7 +124,7 @@ export async function POST(req: NextRequest) {
         orderId,
       },
       success_url: `${cleanOrigin}/orders/${orderId}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${cleanOrigin}/checkout?canceled=true`,
+      cancel_url: `${cleanOrigin}/checkout?canceled=true&order_id=${orderId}`,
     });
 
     return NextResponse.json({

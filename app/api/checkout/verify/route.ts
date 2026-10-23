@@ -28,12 +28,22 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    if (!secretKey.startsWith("sk_test_")) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid Stripe Secret Key. For this demo, only sandbox test keys starting with sk_test_ are allowed.",
+        },
+        { status: 400 }
+      );
+    }
+
     const stripe = new Stripe(secretKey, {
       apiVersion: "2024-12-18.acacia" as Stripe.LatestApiVersion,
     });
 
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ["line_items", "payment_intent"],
+      expand: ["payment_intent"],
     });
 
     const isPaid = session.payment_status === "paid";
