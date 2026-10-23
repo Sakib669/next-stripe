@@ -3,22 +3,22 @@ _Steps derived from spec 0001 acceptance criteria. `/check verify` runs these; `
 
 ## UI / manual
 
-* [ ] Visit storefront home at `http://localhost:3001/` → catalog grid displays 6 curated items with prices in USD and category filter pills → AC-1
-* [ ] Click any product card → navigates to `/products/[id]` showing imagery, detailed specifications, and quantity controls → AC-2
-* [ ] Click Add to Cart → slide out cart drawer opens with item quantity, subtotal, and tax calculation → AC-2, AC-3
-* [ ] Click Configure Keys in top navigation header → open credentials drawer and enter test keys `pk_test_...` and `sk_test_...` → status indicator turns green and persists in browser local storage → AC-4
-* [ ] Click Proceed to Checkout → navigate to `/checkout` with order summary breakdown and Pay with Stripe button → AC-3
-* [ ] Click Pay with Stripe → Next.js server creates Checkout Session and browser redirects to Stripe Hosted Checkout at `checkout.stripe.com` → AC-5
-* [ ] Click back or cancel on Stripe checkout page → redirects back to `/checkout?canceled=true` with friendly cancellation alert and cart preserved → AC-6
-* [ ] Complete checkout using test card 4242 4242 4242 4242 → redirects to `/orders/[id]?session_id=...` → AC-5, AC-7
-* [ ] On `/orders/[id]`, application verifies session with Stripe API, marks order status as PAID, clears active cart, and displays verified receipt with Stripe session and payment intent IDs → AC-7
-* [ ] Visit `/orders` → verify completed order appears in local storage past orders list with date, total, and receipt view link → AC-8
+* [x] Visit storefront home at `http://localhost:3001/` → catalog grid displays 6 curated items with prices in USD and category filter pills → AC-1
+* [x] Click any product card → navigates to `/products/[id]` showing imagery, detailed specifications, and quantity controls → AC-2
+* [x] Click Add to Cart → slide out cart drawer opens with item quantity, subtotal, and tax calculation → AC-2, AC-3
+* [x] Click Configure Keys in top navigation header → open credentials drawer and enter test keys `pk_test_...` and `sk_test_...` → status indicator turns green and persists in browser local storage → AC-4
+* [x] Click Proceed to Checkout → navigate to `/checkout` with order summary breakdown and Pay with Stripe button → AC-3
+* [x] Click Pay with Stripe → Next.js server creates Checkout Session and browser redirects to Stripe Hosted Checkout at `checkout.stripe.com` → AC-5
+* [x] Click back or cancel on Stripe checkout page → redirects back to `/checkout?canceled=true` with friendly cancellation alert and cart preserved → AC-6
+* [x] Complete checkout using test card 4242 4242 4242 4242 → redirects to `/orders/[id]?session_id=...` → AC-5, AC-7
+* [x] On `/orders/[id]`, application verifies session with Stripe API, marks order status as PAID, clears active cart, and displays verified receipt with Stripe session and payment intent IDs → AC-7
+* [x] Visit `/orders` → verify completed order appears in local storage past orders list with date, total, and receipt view link → AC-8
 
 ## Commands
 
-* [ ] `npm run build` → Next.js builds all static and dynamic routes cleanly with zero TypeScript errors → AC-1, AC-5, AC-7
-* [ ] `curl -s http://localhost:3001/api/checkout/status` → returns `{ "serverConfigured": false }` when no environment keys set → AC-4
-* [ ] `curl -s -X POST http://localhost:3001/api/checkout -H "Content-Type: application/json" -d '{}'` → returns 401 with missing key prompt → AC-4, AC-5
+* [x] `npm run build` → Next.js builds all static and dynamic routes cleanly with zero TypeScript errors → AC-1, AC-5, AC-7
+* [x] `curl -s http://localhost:3001/api/checkout/status` → returns `{ "serverConfigured": false }` when no environment keys set → AC-4
+* [x] `curl -s -X POST http://localhost:3001/api/checkout -H "Content-Type: application/json" -d '{}'` → returns 401 with missing key prompt → AC-4, AC-5
 
 ## Acceptance criteria coverage
 

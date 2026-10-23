@@ -24,5 +24,5 @@ Minimal ecommerce application built on Next.js with functional Stripe sandbox ch
   * [x] Storefront browsing and credentials drawer (Landing catalog, product details, and credentials manager), covers AC-1, AC-2, AC-4
   * [x] Checkout page and Stripe session creation API route, covers AC-3, AC-5, AC-6
   * [x] Payment verification API route, order receipt page, and order history, covers AC-7, AC-8
-* [ ] Verify it: /check verify stripe sandbox ecommerce store
+* [x] Verify it: /check verify stripe sandbox ecommerce store
 * [ ] Test it: /test stripe sandbox ecommerce store
